@@ -1,7 +1,7 @@
 package org.stepware.oswf
 {
 		
-	import org.jackysoft.as3.oswf.StepNode;
+
 	
 	public class JoinElement extends StepNode
 	{
@@ -12,8 +12,8 @@ package org.stepware.oswf
 			this.graphics.lineStyle(1,0xFFFF00);
 			this.graphics.beginFill(0x6699FF);
 			this.graphics.moveTo(0,0);
-			this.graphics.lineTo(this.DIAMETER,this.RADIUS);
-			this.graphics.lineTo(0,this.DIAMETER);
+			this.graphics.lineTo(DIAMETER,RADIUS);
+			this.graphics.lineTo(0,DIAMETER);
 			this.graphics.lineTo(0,0);
 			this.graphics.endFill();
 		}

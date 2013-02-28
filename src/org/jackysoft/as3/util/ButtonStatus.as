@@ -16,8 +16,7 @@ package org.jackysoft.as3.util
 			tlabel.width=80;
 			tlabel.height=20;
 			tlabel.text = txt;			
-			addChild(tlabel);
-		
+			addChild(tlabel);	
 			
 		}
 	}

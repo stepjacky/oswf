@@ -1,137 +1,128 @@
 package org.stepware.oswf
 {
+	import flash.display.DisplayObject;
+	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
-	import org.jackysoft.as3.oswf.StepNode;
-	import org.jackysoft.as3.oswf.WorkflowNode;
+	import org.atomsoft.as3.base.WorkflowNode;
+	import org.atomsoft.as3.base.event.ArrowEvent;
+	import org.atomsoft.as3.base.event.EffectiveEvent;
+	import org.atomsoft.as3.base.event.LineMoveEvent;
 	import org.jackysoft.as3.util.DrawManager;
+	import org.jackysoft.as3.util.LineArrow;
+	import org.jackysoft.as3.util.LineStyleUtil;
+	import org.jackysoft.as3.util.PaintUtil;
 	import org.jackysoft.as3.util.RelationNode;
-	import org.stepware.as3.events.LineMoveEvent;
+	import org.jackysoft.as3.util.TurnSquare;
+	import org.stepware.app.WorkflowStage;
 	
 	public class LineElement extends WorkflowNode
 	{
-		
-		public static  var DISDIFF:Number = 100;		
-	    private var head:Point;
-		private var tail:Point;
-		private var drawManager:DrawManager = DrawManager.getInstance();
+			
+	    private var _start:Point;
+		private var _end:Point;
+		private var _from:StepNode;
+		private var _to:StepNode;	
+		private var _drawManager:DrawManager = DrawManager.getInstance();
+		private var _lineUtil:LineStyleUtil = new LineStyleUtil();
 		public function LineElement(from:StepNode,to:StepNode){
-			
 			super();
-			
-			From = from;
-			To = to;
-			if(from is StartElement){
-			    var se:StartElement = from as StartElement;
+			this._from = from;
+			this._to = to;
+	        if(this._to is EndElement){
+			    var t:EndElement = this._to as EndElement;
+				t.Transmit = this;
+			}
+			if(this._from is StartElement){
+			    var se:StartElement = this._from as StartElement;
 				se.Transmit = this;
 				
-			}else{
-				from.addTransmit(this);
 			}
-				
-			to.addTransmit(this);					
-			addEventListener(LineMoveEvent.DRAW,reDrawMe);
-			//加入后先不绘制
-			//dispatchEvent(new DrawEvent());
-			var fp:Point = from.localToGlobal(from.InitiPoint);
-			var tp:Point = to.localToGlobal(to.InitiPoint);			
-			//addEventListener(MouseEvent.CLICK,clickHanlder);
-			head = fp;
-			tail =tp;
 			
+		    _from.addTransmit(this);
+			_to.addTransmit(this);					
+			addEventListener(LineMoveEvent.DRAW,reDrawMe);
+			
+			this._start = this._from.localToGlobal(from.LinePoint);
+			this._end = this._to.localToGlobal(to.LinePoint);			
+			addEventListener(MouseEvent.CLICK,clickHanlder);
+					
 		}
 		  
-		private var from:StepNode;
-		private var to:StepNode;	
+		
 		public function set From(line:StepNode):void{
 			if(line is JoinElement){
 				var j:JoinElement = line as JoinElement;
 				j.hasFrom = true;
 			}
 				
-			this.from = line;
+			this._from = line;
 		}
 		
 		public function set To(line:StepNode):void{
-		   this.to = line;	
+		   this._to = line;	
 		}
 		
 		public function get From():StepNode{
-			return this.from;
+			return this._from;
 		}
 		public function get To():StepNode{
-			return this.to;
+			return this._to;
 		}
 		
 		private function reDrawMe(evt:LineMoveEvent):void
 		{
-			this.graphics.clear();
-			this.graphics.lineStyle(4,0x336699);
-			var hrel:RelationNode = drawManager.findRelation(this,true);
-			var trel:RelationNode = drawManager.findRelation(this,false);
-			var fp:Point = From.localToGlobal(hrel.Position);
-			var tp:Point = To.localToGlobal(trel.Position);
-			var ax:Number = Math.abs(fp.x-tp.x);
-			var bx:Number = Math.abs(fp.y-tp.y);
-			var cx:Number = Math.sqrt(Math.pow(ax, 2) + Math.pow(bx, 2));
-			
-			var ydiff:Number = Math.abs(tp.y-fp.y);
-			var xdiff:Number = Math.abs(tp.x-fp.x);
-			//亮点之间画直线
-			var horizontal:Boolean = ydiff<=DISDIFF;
-			var vertical:Boolean = xdiff<=DISDIFF;
-		
-			var ma:Point = null; 
-			var mb:Point = null;
-			
-		    if(!horizontal){
-				ma = new Point(fp.x+COORDINATE_OFFSET,fp.y);
-				mb = new Point(fp.x+COORDINATE_OFFSET,tp.y);
-				
-				//如果结束元素位于起始元素左边,则反转线位置
-				if(tp.x<fp.x){
-					ma.x = ma.x-2*COORDINATE_OFFSET;
-					mb.x = mb.x-2*COORDINATE_OFFSET;
-				}
-			}
-			if(!vertical){
-				ma = new Point(fp.x,fp.y-COORDINATE_OFFSET);
-				mb = new Point(tp.x,fp.y-COORDINATE_OFFSET);
-			}
-			
-			var brokenable:Boolean = !horizontal || !vertical;
-			
-			this.graphics.moveTo(fp.x,fp.y);
-			if(brokenable){
-			    this.graphics.lineTo(ma.x,ma.y);
-			    this.graphics.lineTo(mb.x,mb.y);
-			}
-			this.graphics.lineTo(tp.x,tp.y);
-			trace("头端点位置 : "+fp+"尾端点位置:"+tp);
-			head = fp;
-			tail =tp;
-			
+			this._drawManager.paintLine(this,evt.header,evt.tailer);			
 		}
-		
-	
+		      
 		protected override function dragthis(event:MouseEvent):void 
 		{ 
-			super.dragthis(event);
-		    trace(head+" , "+tail);
+			//super.dragthis(event);
+			//这里鼠标坐标是舞台坐标
+			var mp:Point	  = new Point(event.stageX,event.stageY);
+			var emp:Point = this.To.globalToLocal(mp);
+			var enddis:Number = Point.distance(emp,this.End);
+			var smp:Point = this.From.globalToLocal(mp);
+			var startdis:Number = Point.distance(smp,this.Start);
+			var dragHeadable:Boolean = false;
+			var dragTailable:Boolean = false;
 			
-		} 				
-		
-		/**
-		 * 坐标位移
-		 * */
-		public function get COORDINATE_OFFSET() :Number{
-			return From.RADIUS+30;
-		}
+			var evt:LineMoveEvent = new LineMoveEvent();
+			if(enddis<=10){
+			   evt.header = this._start;
+			   evt.tailer = this.To.globalToLocal(mp);
+			   dragHeadable = true;
+			}
+			if(startdis<=10){
+				evt.header = this.From.globalToLocal(mp);
+				evt.tailer = this._end;
+				dragTailable = true;
+			}
+			if(dragHeadable && this.hitTestObject(this.From))
+				this.dispatchEvent(evt);
+			if(dragTailable && this.hitTestObject(this.To))
+				this.dispatchEvent(evt);
+		} 			
 		
 		private function clickHanlder(evt:MouseEvent):void{
-			//trace(evt.target);		
-			
+			var mp:Point = new Point(evt.stageX,evt.stageY);						
+		}		
+		
+		public function get Start():Point{
+		   return this._start;
+		}
+		
+		public function set Start(va:Point):void{
+			this._start = va;
+		}
+		
+		public function get End():Point{
+		   return this._end;
+		}
+		
+		public function set End(p:Point):void{
+			this._end = p;
 		}
 		
 	}

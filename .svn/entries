@@ -1,0 +1,63 @@
+10
+
+dir
+450
+https://javaman.googlecode.com/svn/oswf
+https://javaman.googlecode.com/svn
+
+
+
+2011-09-18T15:35:50.152767Z
+449
+qujiakang
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+314270da-cd08-11dd-a405-31afbefa9e0e
+
+.actionScriptProperties
+file
+0
+
+
+add
+
+.project
+file
+0
+
+
+add
+
+.settings
+dir
+
+
+
+add
+
+html-template
+dir
+
+
+
+add
+
+src
+dir
+
+
+
+add
+

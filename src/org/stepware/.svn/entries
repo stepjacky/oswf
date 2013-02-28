@@ -1,0 +1,49 @@
+10
+
+dir
+0
+https://javaman.googlecode.com/svn/oswf/src/org/stepware
+https://javaman.googlecode.com/svn
+add
+
+
+
+
+
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+314270da-cd08-11dd-a405-31afbefa9e0e
+
+app
+dir
+
+
+
+add
+
+as3
+dir
+
+
+
+add
+
+oswf
+dir
+
+
+
+add
+

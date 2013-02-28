@@ -1,20 +1,21 @@
 package org.jackysoft.as3.util
 {
+	import flash.display.Graphics;
 	import flash.geom.Point;
 	
-	import org.jackysoft.as3.oswf.StepNode;
-	import org.jackysoft.as3.oswf.WorkflowNode;
+	import org.atomsoft.as3.base.WorkflowNode;
 	import org.stepware.oswf.*;
 	
 	
 	public class DrawManager
 	{
 		private static var _instance:DrawManager;
+		private var _lineStyle:LineStyleUtil;
 		private var headstep:StepNode;
 		private var tailstep:StepNode;
-		private var lineStepMap:Vector.<RelationNode>;
 		public function DrawManager(efor:SingletonEnforcer){
-			lineStepMap = new Vector.<RelationNode>();
+			_lineStyle = new LineStyleUtil();
+			_lineStyle.OFFSET = StepNode.RADIUS+30;
 		}
 		
 		public static function getInstance():DrawManager{
@@ -71,12 +72,8 @@ package org.jackysoft.as3.util
 		
 		public function giveLine():LineElement{
 			
-			trace("条件是否满足: "+Satisfaction);
 			if(Satisfaction){
 				var le:LineElement  =  new LineElement(headstep,tailstep);
-				this.lineStepMap.push(new RelationNode(le,headstep,true));
-				this.lineStepMap.push(new RelationNode(le,tailstep,false));
-				//trace(this.lineStepMap);
 				return le;
 			}else{
 				return null;
@@ -87,38 +84,22 @@ package org.jackysoft.as3.util
 		 * 判断是否头尾条件都满足
 		 * */
 		public function get Satisfaction():Boolean{
-			var satisfy:Boolean = false;
-			trace(headstep);
-			trace(tailstep);
-			if(headstep!=null && tailstep!=null){
-				trace(headstep is StartNode);
-				if(headstep is StartNode){
-				   var h:StartNode = headstep as StartNode;
-				   return h.getConnection()==null;
-				   
-				}
+			if(headstep==null || tailstep==null) return false;
+			if(headstep is StartNode){
+				var h:StartNode = headstep as StartNode;
+				return h.getConnection()==null;
+				
 			}
-			return satisfy;
+			if(tailstep is EndNode ){
+			    var t:EndNode = tailstep as EndNode;
+				return t.getConnection()==null;
+			}
+			return true;
 		}
-		
-		
-		/**
-		 * 查找Line位于step元素中的点位置
-		 * @param line LineElement 线元素
-		 * @param isHeader  boolean 是否头步骤
-		 * @return 
-		 * 线元素的   Point 坐标 根据isHeader的值确定，
-		 * <b>true</b> 则返回头坐标
-		 * <b>false</b> 则返回尾坐标
-		 * */
-		public function findRelation(line:LineElement,isHeader:Boolean=true):RelationNode{
-			for each(var lsr:RelationNode in this.lineStepMap){
-				if(lsr.IsHead==isHeader && line===lsr.Line){
-					return lsr;
-				}
-			}
-			return null;
-		}		
+				
+		public function paintLine(line:LineElement,start:Point,end:Point):void{
+			_lineStyle.paintLine(line,start,end);
+		}
 		
 	}
 	

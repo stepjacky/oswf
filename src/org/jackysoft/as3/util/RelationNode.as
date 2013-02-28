@@ -1,7 +1,7 @@
 package org.jackysoft.as3.util
 {
 	import flash.geom.Point;
-	import org.jackysoft.as3.oswf.StepNode;
+	import oswf.StepNode;
 	import org.stepware.oswf.LineElement;
 	import org.stepware.oswf.StepElement;
 
@@ -14,13 +14,13 @@ package org.jackysoft.as3.util
 		private var line:LineElement;
 		private var step:StepNode;
 		private var isHead:Boolean = false;
-		private var positionPoint:Point;
+		private var position:Point;
 		public function RelationNode(line:LineElement,step:StepNode,head:Boolean=false)			
 		{
 			this.line = line;
 			this.step = step;
 			this.isHead = head;
-			this.positionPoint = step.InitiPoint;
+			this.position = step.InitiPoint;
 			
 		}
 		
@@ -40,12 +40,12 @@ package org.jackysoft.as3.util
 		 * 设置line端点位置
 		 * */
 	    public function set Position(p:Point):void{
-		    this.positionPoint = p;	
+		    this.position = p;	
 		}
 
 		/**端点位置*/
 		public function get Position():Point{
-		    return  this.positionPoint;	
+		    return  this.position;	
 		}
 		
 		/**步骤元素*/
